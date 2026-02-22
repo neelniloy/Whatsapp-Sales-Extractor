@@ -1,14 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Transaction } from "../types";
 
-// In Vite, environment variables must be prefixed with VITE_ and accessed via import.meta.env
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+// Fallback to env for local development
+const ENV_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
 const MODEL_NAME = "gemini-2.5-flash";
 
 let genAI: GoogleGenAI | null = null;
-if (API_KEY) {
-  genAI = new GoogleGenAI({ apiKey: API_KEY });
-}
 
 const SYSTEM_INSTRUCTION = `
 You are a strict financial data extraction engine.
@@ -82,14 +79,15 @@ const transactionSchema = {
   required: ["currency", "payment_status", "confidence_score"],
 };
 
-export async function extractTransactions(chatLog: string): Promise<Transaction[]> {
-  if (!API_KEY) {
-    throw new Error("Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.");
+export async function extractTransactions(chatLog: string, userApiKey?: string): Promise<Transaction[]> {
+  const activeKey = userApiKey || ENV_API_KEY;
+
+  if (!activeKey) {
+    throw new Error("API Key is missing. Please provide one in the settings.");
   }
 
-  if (!genAI) {
-    genAI = new GoogleGenAI({ apiKey: API_KEY });
-  }
+  // Support changing the key during a session
+  genAI = new GoogleGenAI({ apiKey: activeKey });
 
   try {
     const response = await genAI.models.generateContent({

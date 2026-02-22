@@ -12,6 +12,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempKey, setTempKey] = useState(apiKey);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -19,23 +22,38 @@ export default function App() {
     }
   }, []);
 
+  const handleSaveKey = () => {
+    localStorage.setItem('gemini_api_key', tempKey);
+    setApiKey(tempKey);
+    setShowSettings(false);
+  };
+
   const handleExtract = useCallback(async () => {
     if (!input.trim()) return;
+
+    if (!apiKey) {
+      setShowSettings(true);
+      setError("Please provide an API key to continue.");
+      return;
+    }
     
     setLoading(true);
     setError(null);
     setTransactions(null);
 
     try {
-      const result = await extractTransactions(input);
+      const result = await extractTransactions(input, apiKey);
       setTransactions(result);
     } catch (err: any) {
       setError(err.message || 'Failed to extract data. Please try again.');
+      if (err.message?.includes("API Key")) {
+        setShowSettings(true);
+      }
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [input]);
+  }, [input, apiKey]);
 
   const handleClear = useCallback(() => {
     setInput('');
@@ -166,6 +184,17 @@ export default function App() {
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <div className={`h-6 w-px ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
+            <button 
+              onClick={() => {
+                setTempKey(apiKey);
+                setShowSettings(true);
+              }}
+              className={`p-2 rounded-lg transition-colors ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              title="API Settings"
+            >
+              <Copy className="w-5 h-5" /> 
             </button>
             <div className={`h-6 w-px ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
             <button 
@@ -385,6 +414,74 @@ export default function App() {
         </div>
 
       </main>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`w-full max-w-md p-8 rounded-3xl shadow-2xl border transition-colors ${
+                darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
+                  <Copy className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">API Settings</h3>
+                  <p className="text-xs text-slate-500">Your key is stored locally in your browser.</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 ml-1">
+                    Gemini API Key
+                  </label>
+                  <input 
+                    type="password"
+                    value={tempKey}
+                    onChange={(e) => setTempKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    className={`w-full p-4 rounded-xl border focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-mono text-sm ${
+                      darkMode 
+                        ? 'bg-slate-800 border-slate-700 text-slate-200' 
+                        : 'bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                  />
+                </div>
+
+                <div className={`text-[11px] p-4 rounded-xl leading-relaxed ${
+                  darkMode ? 'bg-indigo-500/5 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
+                }`}>
+                  Get your free API key from the <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-bold">Google AI Studio</a>.
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    onClick={() => setShowSettings(false)}
+                    className={`flex-1 px-6 py-3 rounded-xl font-bold transition-all ${
+                      darkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-200'
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSaveKey}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                  >
+                    Save Key
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
