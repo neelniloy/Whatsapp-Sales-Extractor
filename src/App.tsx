@@ -16,11 +16,6 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
 
-  useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
-  }, []);
 
   const handleSaveKey = () => {
     localStorage.setItem('gemini_api_key', tempKey);
@@ -71,13 +66,13 @@ export default function App() {
   }, []);
 
   const loadExample = () => {
-    setInput(`[07/02/2025, 9:00 PM] Arif: 1kg mutton lagbe
+    setInput(`[07/02/2025, 9:00 PM] Niloy: 1kg mutton lagbe
 [07/02/2025, 9:01 PM] Seller: 900
-[07/02/2025, 9:02 PM] Arif: ok
+[07/02/2025, 9:02 PM] Niloy: ok
 
-[09/02/2025, 6:30 PM] Arif: ajke 2kg den
+[09/02/2025, 6:30 PM] Niloy: ajke 2kg den
 [09/02/2025, 6:31 PM] Seller: 1800
-[09/02/2025, 6:32 PM] Arif: payment done
+[09/02/2025, 6:32 PM] Niloy: payment done
 
 [10/02/2025, 10:00 AM] Kamal: 3 shirts order korbo
 [10/02/2025, 10:05 AM] Seller: 1500 BDT total
