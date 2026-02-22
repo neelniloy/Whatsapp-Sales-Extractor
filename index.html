@@ -3,7 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    <title>WhatsApp Transaction Extractor</title>
+    <script>
+      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
+      // This happens when polyfills (like formdata-polyfill) try to overwrite window.fetch
+      (function() {
+        console.log('Initializing global proxy fix...');
+        try {
+          var proxy = new Proxy(window, {
+            set: function(target, prop, value) {
+              if (prop === 'fetch') {
+                console.warn('Intercepted attempt to overwrite fetch');
+                return true;
+              }
+              try {
+                target[prop] = value;
+              } catch (e) {
+                // Ignore errors for read-only properties
+              }
+              return true;
+            },
+            get: function(target, prop) {
+              var val = target[prop];
+              if (typeof val === 'function') {
+                // Bind functions to window to avoid "Illegal invocation" errors
+                if (val.bind) return val.bind(target);
+              }
+              return val;
+            }
+          });
+          window.global = proxy;
+          console.log('Global proxy fix initialized successfully');
+        } catch (e) {
+          console.error('Failed to set up global proxy:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

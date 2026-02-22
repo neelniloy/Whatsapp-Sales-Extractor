@@ -3,6 +3,7 @@ import { extractTransactions } from './services/gemini';
 import { Transaction } from './types';
 import { TransactionList } from './components/TransactionList';
 import { Sparkles, Loader2, Copy, Trash2, Download, AlertCircle, MessageSquare, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export default function App() {
   const [input, setInput] = useState('');
@@ -59,12 +60,13 @@ export default function App() {
   const downloadCSV = () => {
     if (!transactions || transactions.length === 0) return;
 
-    const headers = ['Customer', 'Description', 'Total Amount', 'Partial Paid', 'Currency', 'Date', 'Status', 'Confidence'];
+    const headers = ['Customer', 'Description', 'Unit', 'Total Amount', 'Partial Paid', 'Currency', 'Date', 'Status', 'Confidence'];
     const csvContent = [
       headers.join(','),
       ...transactions.map(t => [
         `"${t.customer_name || ''}"`,
         `"${t.order_description || ''}"`,
+        t.unit || '',
         t.amount || '',
         t.partial_amount || '',
         t.currency,
@@ -194,7 +196,11 @@ export default function App() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-rose-50 text-rose-700 px-4 py-3 rounded-xl border border-rose-200 text-sm flex items-start gap-3 shadow-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-rose-50 text-rose-700 px-4 py-3 rounded-xl border border-rose-200 text-sm flex items-start gap-3 shadow-sm"
+            >
               <div className="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
               </div>
@@ -211,7 +217,7 @@ export default function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-            </div>
+            </motion.div>
           )}
 
           <div className="flex-1 bg-slate-50/50 rounded-2xl border border-slate-200/50 p-1 overflow-y-auto">

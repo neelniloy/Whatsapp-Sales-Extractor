@@ -1,6 +1,7 @@
 import React from 'react';
 import { Transaction } from '../types';
 import { CheckCircle, AlertCircle, Clock, HelpCircle, DollarSign, Calendar, Trash2, User, ShoppingBag } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -50,8 +51,12 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
   return (
     <div className="space-y-3">
       {transactions.map((t, i) => (
-        <div
+        <motion.div
           key={i}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ delay: i * 0.05 }}
           className="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
         >
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center">
@@ -73,6 +78,13 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
 
             {/* Middle: Description */}
             <div className="flex-[2] min-w-0 border-l border-slate-100 pl-0 sm:pl-4">
+              <div className="flex items-center gap-2 mb-1">
+                {t.unit && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    {t.unit} UNIT{t.unit > 1 ? 'S' : ''}
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-slate-600 line-clamp-2">
                 {t.order_description || <span className="italic text-slate-400">No description available</span>}
               </p>
@@ -114,7 +126,7 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
               style={{ width: `${t.confidence_score * 100}%` }} 
             />
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
