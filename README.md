@@ -1,4 +1,4 @@
-# WhatsApp Sales Extractor 🚀
+# Chat2Sale Report 🚀
 
 A premium AI-powered tool to extract structured financial transactions from WhatsApp chat logs using **Gemini 2.5 Flash**.
 

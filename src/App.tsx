@@ -155,7 +155,7 @@ export default function App() {
               <Sparkles className="w-6 h-6" />
             </motion.div>
             <div>
-              <h1 className="font-bold text-xl tracking-tight">WhatsApp Sales Extractor</h1>
+              <h1 className="font-bold text-xl tracking-tight">Chat2Sale Report</h1>
               <p className="text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em]">Automated Transaction Insight</p>
             </div>
           </div>

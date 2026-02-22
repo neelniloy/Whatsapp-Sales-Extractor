@@ -1,5 +1,5 @@
 {
-  "name": "WhatsApp Transaction Extractor",
+  "name": "WhatsApp Sales Extractor",
   "description": "Extract structured business transaction data from informal WhatsApp chat logs using Gemini AI.",
   "requestFramePermissions": []
 }
