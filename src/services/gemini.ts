@@ -1,6 +1,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Transaction } from "../types";
 
+// In Vite, environment variables must be prefixed with VITE_ and accessed via import.meta.env
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+const MODEL_NAME = "gemini-2.5-flash";
+
+let genAI: GoogleGenAI | null = null;
+if (API_KEY) {
+  genAI = new GoogleGenAI({ apiKey: API_KEY });
+}
+
 const SYSTEM_INSTRUCTION = `
 You are a strict financial data extraction engine.
 
@@ -74,15 +83,17 @@ const transactionSchema = {
 };
 
 export async function extractTransactions(chatLog: string): Promise<Transaction[]> {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Gemini API Key is missing");
+  if (!API_KEY) {
+    throw new Error("Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  if (!genAI) {
+    genAI = new GoogleGenAI({ apiKey: API_KEY });
+  }
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const response = await genAI.models.generateContent({
+      model: MODEL_NAME,
       contents: chatLog,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
@@ -94,13 +105,13 @@ export async function extractTransactions(chatLog: string): Promise<Transaction[
       },
     });
 
-    let text = response.text;
-    if (!text) return [];
+    const responseText = response.text;
+    if (!responseText) return [];
     
     // Sanitize: Remove markdown code blocks if present
-    text = text.replace(/```json\n?|\n?```/g, '').trim();
+    const sanitizedText = responseText.replace(/```json\n?|\n?```/g, '').trim();
 
-    return JSON.parse(text) as Transaction[];
+    return JSON.parse(sanitizedText) as Transaction[];
   } catch (error: any) {
     console.error("Extraction error:", error);
     // Return a more user-friendly error message if possible

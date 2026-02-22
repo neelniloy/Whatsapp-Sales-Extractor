@@ -6,14 +6,23 @@ import { motion } from 'motion/react';
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (index: number) => void;
+  darkMode?: boolean;
 }
 
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status, darkMode }: { status: string; darkMode?: boolean }) => {
   const styles = {
-    PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/20',
-    DUE: 'bg-rose-50 text-rose-700 border-rose-200 ring-rose-500/20',
-    PARTIAL: 'bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/20',
-    UNKNOWN: 'bg-slate-50 text-slate-600 border-slate-200 ring-slate-500/20',
+    PAID: darkMode 
+      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 ring-emerald-500/10' 
+      : 'bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/20',
+    DUE: darkMode
+      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 ring-rose-500/10'
+      : 'bg-rose-50 text-rose-700 border-rose-200 ring-rose-500/20',
+    PARTIAL: darkMode
+      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 ring-amber-500/10'
+      : 'bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/20',
+    UNKNOWN: darkMode
+      ? 'bg-slate-500/10 text-slate-400 border-slate-500/20 ring-slate-500/10'
+      : 'bg-slate-50 text-slate-600 border-slate-200 ring-slate-500/20',
   };
 
   const icons = {
@@ -26,22 +35,26 @@ const StatusBadge = ({ status }: { status: string }) => {
   const key = status as keyof typeof styles;
   
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ring-1 ring-inset ${styles[key] || styles.UNKNOWN}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold border ring-1 ring-inset uppercase tracking-wide transition-colors ${styles[key] || styles.UNKNOWN}`}>
       {icons[key] || icons.UNKNOWN}
       {status}
     </span>
   );
 };
 
-export function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export function TransactionList({ transactions, onDelete, darkMode }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
-        <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ShoppingBag className="w-8 h-8 text-slate-400" />
+      <div className={`text-center py-16 rounded-3xl border border-dashed transition-colors ${
+        darkMode ? 'bg-slate-900/20 border-slate-800' : 'bg-white border-slate-300'
+      }`}>
+        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors ${
+          darkMode ? 'bg-slate-800 text-slate-600' : 'bg-slate-50 text-slate-300'
+        }`}>
+          <ShoppingBag className="w-10 h-10" />
         </div>
-        <h3 className="text-slate-900 font-medium text-lg">No transactions found</h3>
-        <p className="text-slate-500 mt-1 max-w-sm mx-auto">
+        <h3 className={`font-bold text-xl ${darkMode ? 'text-slate-200' : 'text-slate-900'}`}>No transactions found</h3>
+        <p className={`mt-2 max-w-sm mx-auto text-sm ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
           Paste your chat logs on the left to extract transaction data automatically.
         </p>
       </div>
@@ -53,53 +66,61 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
       {transactions.map((t, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95, height: 0 }}
+          transition={{ duration: 0.3, delay: i * 0.05 }}
+          className={`group rounded-2xl border transition-all overflow-hidden shadow-lg hover:shadow-2xl ${
+            darkMode 
+              ? 'bg-slate-900/40 border-slate-800 hover:border-indigo-500/30' 
+              : 'bg-white border-white hover:border-indigo-100'
+          }`}
         >
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center">
             {/* Left: Customer & Date */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="bg-indigo-50 p-1.5 rounded-md text-indigo-600">
-                  <User className="w-4 h-4" />
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-2.5 rounded-xl transition-colors ${
+                  darkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
+                }`}>
+                  <User className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-slate-900 truncate">
+                <h3 className={`font-bold text-lg truncate ${darkMode ? 'text-slate-200' : 'text-slate-900'}`}>
                   {t.customer_name || 'Unknown Customer'}
                 </h3>
               </div>
-              <div className="flex items-center text-xs text-slate-500 ml-9">
-                <Calendar className="w-3 h-3 mr-1" />
-                {t.transaction_date || 'No date'}
+              <div className={`flex items-center text-[10px] font-bold uppercase tracking-wider ml-12 ${darkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                {t.transaction_date || 'N/A'}
               </div>
             </div>
 
             {/* Middle: Description */}
-            <div className="flex-[2] min-w-0 border-l border-slate-100 pl-0 sm:pl-4">
-              <div className="flex items-center gap-2 mb-1">
+            <div className={`flex-[2] min-w-0 sm:border-l pl-0 sm:pl-6 transition-colors ${darkMode ? 'border-white/5' : 'border-slate-100'}`}>
+              <div className="flex items-center gap-2 mb-2">
                 {t.unit && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    {t.unit} UNIT{t.unit > 1 ? 'S' : ''}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                    darkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {t.unit} {t.unit > 1 ? 'Units' : 'Unit'}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-600 line-clamp-2">
-                {t.order_description || <span className="italic text-slate-400">No description available</span>}
+              <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                {t.order_description || <span className="italic opacity-50">No description available</span>}
               </p>
             </div>
 
             {/* Right: Amount & Status */}
-            <div className="flex items-center justify-between sm:justify-end gap-4 min-w-[140px] border-l border-slate-100 pl-0 sm:pl-4">
+            <div className={`flex items-center justify-between sm:justify-end gap-6 min-w-[160px] sm:border-l pl-0 sm:pl-6 transition-colors ${darkMode ? 'border-white/5' : 'border-slate-100'}`}>
               <div className="text-right">
-                <div className="text-sm font-bold text-slate-900 tabular-nums">
-                  {t.amount?.toLocaleString() ?? '--'} <span className="text-xs font-normal text-slate-500">{t.currency}</span>
+                <div className="text-xl font-black tabular-nums tracking-tight">
+                  {t.amount?.toLocaleString() ?? '--'} <span className="text-[10px] font-bold text-slate-500 uppercase ml-1">{t.currency}</span>
                 </div>
-                <div className="mt-1 flex flex-col items-end gap-1">
-                  <StatusBadge status={t.payment_status} />
+                <div className="mt-2 flex flex-col items-end gap-1.5">
+                  <StatusBadge status={t.payment_status} darkMode={darkMode} />
                   {t.payment_status === 'PARTIAL' && t.partial_amount && (
-                    <div className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                    <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
                       Paid: {t.partial_amount.toLocaleString()} {t.currency}
                     </div>
                   )}
@@ -108,22 +129,26 @@ export function TransactionList({ transactions, onDelete }: TransactionListProps
               
               <button
                 onClick={() => onDelete(i)}
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                className={`p-2.5 rounded-xl transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 active:scale-90 ${
+                  darkMode ? 'text-slate-600 hover:text-rose-400 hover:bg-rose-500/10' : 'text-slate-300 hover:text-rose-600 hover:bg-rose-50'
+                }`}
                 title="Delete transaction"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-5 h-5" />
               </button>
             </div>
           </div>
           
           {/* Confidence Bar (Bottom) */}
-          <div className="h-1 w-full bg-slate-50">
-            <div 
+          <div className={`h-1.5 w-full transition-colors ${darkMode ? 'bg-white/5' : 'bg-slate-50'}`}>
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${t.confidence_score * 100}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
               className={`h-full transition-all duration-500 ${
                 t.confidence_score > 0.8 ? 'bg-emerald-500' : 
                 t.confidence_score > 0.5 ? 'bg-amber-500' : 'bg-rose-500'
               }`} 
-              style={{ width: `${t.confidence_score * 100}%` }} 
             />
           </div>
         </motion.div>
