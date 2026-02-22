@@ -3,7 +3,7 @@ import { Transaction } from "../types";
 
 // In Vite, environment variables must be prefixed with VITE_ and accessed via import.meta.env
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-2.5-flash";
 
 let genAI: GoogleGenAI | null = null;
 if (API_KEY) {
